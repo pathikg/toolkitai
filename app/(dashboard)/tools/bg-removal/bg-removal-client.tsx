@@ -51,7 +51,9 @@ export default function BgRemovalClient() {
             const formData = new FormData()
             formData.append('file', selectedFile)
 
-            const response = await fetch('http://localhost:8000/api/bg-removal', {
+            // Use environment variable or fallback to EC2 IP
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://100.30.3.16'
+            const response = await fetch(`${apiUrl}/api/bg-removal`, {
                 method: 'POST',
                 body: formData,
             })
@@ -63,7 +65,7 @@ export default function BgRemovalClient() {
             setProcessedUrl(url)
         } catch (err) {
             console.error(err)
-            setError('Something went wrong. Is the backend running on port 8000?')
+            setError('Failed to process image. Please try again.')
         } finally {
             setIsLoading(false)
         }

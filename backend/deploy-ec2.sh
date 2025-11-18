@@ -16,7 +16,7 @@ sudo apt-get upgrade -y
 echo "🐳 Installing Docker..."
 if ! command -v docker &> /dev/null; then
     curl -fsSL https://get.docker.com -o get-docker.sh
-    sudo sh get-docker.sh
+    sudo sh get-docker.shgot
     sudo usermod -aG docker $USER
     rm get-docker.sh
     echo "✅ Docker installed successfully"

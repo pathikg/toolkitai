@@ -5,6 +5,8 @@ services:
     build: .
     container_name: toolkitai-api
     restart: unless-stopped
+    env_file:
+      - .env.production # Load environment variables
     environment:
       - PYTHONUNBUFFERED=1
     volumes:
