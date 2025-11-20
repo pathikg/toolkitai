@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
@@ -46,11 +46,23 @@ export default function ExcuseMakerClient() {
     const [isLoading, setIsLoading] = useState(false)
     const [result, setResult] = useState<{ text: string; audio: string } | null>(null)
     const [isPlaying, setIsPlaying] = useState(false)
+    const audioRef = useRef<HTMLAudioElement | null>(null)
+
+    // Clean up audio on unmount or new result
+    useEffect(() => {
+        return () => {
+            if (audioRef.current) {
+                audioRef.current.pause()
+                audioRef.current = null
+            }
+        }
+    }, [result])
 
     const handleGenerate = async () => {
         if (!scenario.trim()) return
         setIsLoading(true)
         setResult(null)
+        setIsPlaying(false)
 
         try {
             // Use environment variable or fallback to EC2 IP
@@ -84,12 +96,22 @@ export default function ExcuseMakerClient() {
         }
     }
 
-    const playAudio = () => {
+    const toggleAudio = () => {
         if (!result?.audio) return
-        const audio = new Audio(result.audio)
-        audio.onplay = () => setIsPlaying(true)
-        audio.onended = () => setIsPlaying(false)
-        audio.play()
+
+        if (!audioRef.current) {
+            // Initialize audio if not exists
+            audioRef.current = new Audio(result.audio)
+            audioRef.current.onended = () => setIsPlaying(false)
+            audioRef.current.onpause = () => setIsPlaying(false)
+            audioRef.current.onplay = () => setIsPlaying(true)
+        }
+
+        if (isPlaying) {
+            audioRef.current.pause()
+        } else {
+            audioRef.current.play().catch(e => console.error("Playback error:", e))
+        }
     }
 
     return (
@@ -158,12 +180,12 @@ export default function ExcuseMakerClient() {
 
                                     <div className="flex items-center gap-4">
                                         <Button
-                                            onClick={playAudio}
+                                            onClick={toggleAudio}
                                             variant="outline"
                                             className="flex-1"
                                         >
                                             {isPlaying ? (
-                                                <><Pause className="mr-2 h-4 w-4" /> Playing...</>
+                                                <><Pause className="mr-2 h-4 w-4" /> Pause Audio</>
                                             ) : (
                                                 <><Play className="mr-2 h-4 w-4" /> Play Audio</>
                                             )}
