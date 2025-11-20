@@ -268,25 +268,28 @@ async def face_swap(
         client = genai.Client(api_key=api_key)
         
         prompt = """Face Swap Task:
-        1. Analyze the first image (source face) and the second image (target body/scene).
-        2. Identify the face in the source image.
-        3. Identify the face in the target image.
-        4. Replace the face in the target image with the face from the source image.
-        5. CRITICAL: Keep the target image's background, lighting, body pose, hair, and style EXACTLY as they are. Only change the facial features to match the source person.
+        1. Analyze the input images.
+        2. The FIRST image provided is the SOURCE FACE (the face to be copied).
+        3. The SECOND image provided is the TARGET BODY/SCENE (the image to receive the face).
+        4. Replace the face in the TARGET image with the face from the SOURCE image.
+        5. CRITICAL: Keep the TARGET image's background, lighting, body pose, hair, and style EXACTLY as they are. Only change the facial features to match the SOURCE person.
         6. Blend the source face naturally into the target image, adjusting skin tone and lighting to match the target scene.
         7. Ensure high photorealism.
         8. Go all out on quality and realism.
         """
+
+        # Ensure source image is first (face) and target image is second (scene/body)
+        # We explicitly tell the model which is which in the prompt, but ordering matters for some models.
         
         logger.info("Sending request to Gemini API for Face Swap...")
         response = client.models.generate_content(
             model="gemini-2.5-flash-image",
-            contents=[source_pil, target_pil, prompt],
+            contents=[prompt, source_pil, target_pil], # Put prompt first, then source (face), then target (body)
             config=types.GenerateContentConfig(
                 response_modalities=["IMAGE"],
                 image_config=types.ImageConfig(
                     aspect_ratio=aspect_ratio
-                ),
+                )
             )
         )
         logger.info("Received response from Gemini API")

@@ -232,30 +232,35 @@ export default function FaceSwapClient() {
             </div>
 
             {/* Action Button */}
-            <div className="flex justify-center">
-                <Button
-                    size="lg"
-                    onClick={handleSwap}
-                    disabled={!sourceFile || !targetFile || isLoading || isSampleLoading}
-                    className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-8 h-12 text-lg shadow-lg hover:shadow-xl transition-all"
-                >
-                    {isLoading ? (
-                        <>
-                            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                            Swapping Faces...
-                        </>
-                    ) : isSampleLoading ? (
-                        <>
-                            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                            Loading Sample...
-                        </>
-                    ) : (
-                        <>
-                            <RefreshCw className="mr-2 h-5 w-5" />
-                            Swap Faces Now
-                        </>
-                    )}
-                </Button>
+            <div className="space-y-4">
+                <div className="bg-amber-50 text-amber-800 p-4 rounded-lg text-center border border-amber-200 font-medium max-w-md mx-auto">
+                    ⚠️ Integration still in progress. This feature is currently disabled.
+                </div>
+                <div className="flex justify-center">
+                    <Button
+                        size="lg"
+                        onClick={handleSwap}
+                        disabled={true}
+                        className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-8 h-12 text-lg shadow-lg hover:shadow-xl transition-all"
+                    >
+                        {isLoading ? (
+                            <>
+                                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                                Swapping Faces...
+                            </>
+                        ) : isSampleLoading ? (
+                            <>
+                                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                                Loading Sample...
+                            </>
+                        ) : (
+                            <>
+                                <RefreshCw className="mr-2 h-5 w-5" />
+                                Swap Faces Now
+                            </>
+                        )}
+                    </Button>
+                </div>
             </div>
 
             {/* Error Message */}
