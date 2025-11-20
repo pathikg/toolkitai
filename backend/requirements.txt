@@ -5,4 +5,5 @@ rembg==2.0.56
 pillow==10.2.0
 numpy==1.26.4
 onnxruntime==1.17.1
+google-genai
 
