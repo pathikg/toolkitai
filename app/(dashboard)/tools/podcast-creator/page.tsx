@@ -24,7 +24,7 @@ export default function PodcastCreatorPage() {
                         <h1 className="text-4xl font-bold text-gray-900">AI Podcast Creator</h1>
                     </div>
                     <p className="text-lg text-gray-600">
-                        Generate grounded podcast dialogues between Zephyr and Puck on any topic.
+                        Generate grounded podcast dialogues between Emily and Mark on any topic.
                     </p>
                 </div>
 

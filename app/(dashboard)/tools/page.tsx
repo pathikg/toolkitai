@@ -37,7 +37,7 @@ const featuredTools = [
   {
     id: 'podcast-creator',
     name: 'AI Podcast Creator',
-    description: 'Generate grounded podcast dialogues between Zephyr and Puck on any topic.',
+    description: 'Generate grounded podcast dialogues between Emily and Mark on any topic.',
     icon: Mic,
     href: '/tools/podcast-creator',
     category: 'audio' as const,
