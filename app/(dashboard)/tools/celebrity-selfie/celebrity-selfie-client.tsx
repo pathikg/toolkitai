@@ -179,13 +179,13 @@ export default function CelebritySelfieClient() {
     }, [])
 
     // Helper function to get proxy URL for images (use cached blob URL if available)
-    const getProxyUrl = (url: string): string => {
-        // If we have a cached blob URL, use it
+    const getProxyUrl = (url: string): string | null => {
+        // Only return cached blob URL - never fall back to API route for <img> tags
         if (imageCache.has(url)) {
             return imageCache.get(url)!
         }
-        // Otherwise, fall back to the API route (will work if user is authenticated)
-        return `/api/proxy-image?url=${encodeURIComponent(url)}`
+        // Return null if not cached yet (component will show placeholder)
+        return null
     }
 
     // Handle image load errors for thumbnails
@@ -299,14 +299,18 @@ export default function CelebritySelfieClient() {
                                             <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400 text-xs text-center p-2">
                                                 Failed to load
                                             </div>
-                                        ) : (
+                                        ) : getProxyUrl(url) ? (
                                             <img
-                                                src={getProxyUrl(url)}
+                                                src={getProxyUrl(url)!}
                                                 alt={`User ${i + 1}`}
                                                 className="w-full h-full object-cover pointer-events-none"
                                                 loading="lazy"
                                                 onError={() => handleImageError(url)}
                                             />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-300 text-xs text-center p-2">
+                                                Loading...
+                                            </div>
                                         )}
                                     </button>
                                 ))}
@@ -375,14 +379,18 @@ export default function CelebritySelfieClient() {
                                             <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400 text-xs text-center p-2">
                                                 Failed to load
                                             </div>
-                                        ) : (
+                                        ) : getProxyUrl(url) ? (
                                             <img
-                                                src={getProxyUrl(url)}
+                                                src={getProxyUrl(url)!}
                                                 alt={`Celebrity ${i + 1}`}
                                                 className="w-full h-full object-cover pointer-events-none"
                                                 loading="lazy"
                                                 onError={() => handleImageError(url)}
                                             />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-300 text-xs text-center p-2">
+                                                Loading...
+                                            </div>
                                         )}
                                     </button>
                                 ))}
