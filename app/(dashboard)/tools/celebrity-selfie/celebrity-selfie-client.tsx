@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Loader2, RefreshCw, User, Star, Download } from 'lucide-react'
@@ -136,9 +136,55 @@ export default function CelebritySelfieClient() {
 
     const [isSampleLoading, setIsSampleLoading] = useState(false)
     const [imageLoadErrors, setImageLoadErrors] = useState<Set<string>>(new Set())
+    const [imageCache, setImageCache] = useState<Map<string, string>>(new Map())
 
-    // Helper function to get proxy URL for images
+    // Preload images with authentication
+    useEffect(() => {
+        const blobUrls: string[] = []
+
+        const preloadImages = async () => {
+            const allUrls = [...SAMPLE_USER_PHOTOS, ...SAMPLE_CELEBRITIES]
+            const newCache = new Map<string, string>()
+
+            for (const url of allUrls) {
+                try {
+                    const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(url)}`
+                    const response = await fetch(proxyUrl, {
+                        credentials: 'include', // Ensure cookies are sent
+                    })
+
+                    if (response.ok) {
+                        const blob = await response.blob()
+                        const blobUrl = URL.createObjectURL(blob)
+                        blobUrls.push(blobUrl)
+                        newCache.set(url, blobUrl)
+                    } else {
+                        setImageLoadErrors((prev: Set<string>) => new Set(prev).add(url))
+                    }
+                } catch (err) {
+                    console.error(`Failed to preload image ${url}:`, err)
+                    setImageLoadErrors((prev: Set<string>) => new Set(prev).add(url))
+                }
+            }
+
+            setImageCache(newCache)
+        }
+
+        preloadImages()
+
+        // Cleanup blob URLs on unmount
+        return () => {
+            blobUrls.forEach(url => URL.revokeObjectURL(url))
+        }
+    }, [])
+
+    // Helper function to get proxy URL for images (use cached blob URL if available)
     const getProxyUrl = (url: string): string => {
+        // If we have a cached blob URL, use it
+        if (imageCache.has(url)) {
+            return imageCache.get(url)!
+        }
+        // Otherwise, fall back to the API route (will work if user is authenticated)
         return `/api/proxy-image?url=${encodeURIComponent(url)}`
     }
 
@@ -153,9 +199,8 @@ export default function CelebritySelfieClient() {
         setError(null)
 
         try {
-            // Use backend proxy to bypass CORS
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://100.30.3.16'
-            const proxyUrl = `${apiUrl}/api/proxy-image?url=${encodeURIComponent(url)}`
+            // Use Next.js API route (which handles auth and forwards to backend)
+            const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(url)}`
 
             const response = await fetch(proxyUrl)
 
