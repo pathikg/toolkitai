@@ -29,15 +29,10 @@ export default function Home() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/login">
+            <Link href="/tools">
               <Button size="lg" className="text-lg px-8 py-6 gap-2">
                 Get Started Free
                 <ArrowRight className="w-5 h-5" />
-              </Button>
-            </Link>
-            <Link href="/tools">
-              <Button size="lg" variant="outline" className="text-lg px-8 py-6">
-                Browse Tools
               </Button>
             </Link>
           </div>
@@ -185,7 +180,7 @@ export default function Home() {
             <p className="text-xl mb-6 opacity-90">
               Join thousands of creators using ToolkitAI today
             </p>
-            <Link href="/login">
+            <Link href="/tools">
               <Button size="lg" variant="secondary" className="text-lg px-8 py-6 gap-2 shadow-xl">
                 Start Creating Now
                 <ArrowRight className="w-5 h-5" />

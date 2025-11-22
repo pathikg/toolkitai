@@ -32,28 +32,7 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Protect individual tool routes (but allow /tools browse page)
-  const protectedToolRoutes = [
-    '/tools/bg-removal',
-    '/tools/face-swap',
-    '/tools/virtual-try-on',
-    '/tools/podcast-creator',
-    '/tools/gif-maker',
-    '/tools/mugshot-maker',
-    '/tools/poem-generator',
-  ]
-
-  const isProtectedToolRoute = protectedToolRoutes.some(route =>
-    request.nextUrl.pathname.startsWith(route)
-  )
-
-  if (!user && isProtectedToolRoute) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/login'
-    return NextResponse.redirect(url)
-  }
-
-  // Redirect to dashboard if logged in and trying to access login
+  // Redirect to tools if logged in and trying to access old login page
   if (user && request.nextUrl.pathname === '/login') {
     const url = request.nextUrl.clone()
     url.pathname = '/tools'

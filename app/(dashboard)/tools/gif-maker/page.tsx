@@ -1,4 +1,5 @@
 import { Navbar } from '@/components/Navbar'
+import { AuthGuard } from '@/components/AuthGuard'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -7,9 +8,10 @@ import Link from 'next/link'
 
 export default function GifMakerPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
-      <Navbar />
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <AuthGuard>
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+        <Navbar />
+        <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <Link 
           href="/tools" 
           className="inline-flex items-center text-sm text-indigo-600 hover:text-indigo-700 mb-6"
@@ -87,6 +89,7 @@ export default function GifMakerPage() {
         </Card>
       </main>
     </div>
+    </AuthGuard>
   )
 }
 
