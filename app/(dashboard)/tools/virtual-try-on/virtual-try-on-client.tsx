@@ -19,6 +19,10 @@ export default function VirtualTryOnClient() {
     const handlePersonChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
         if (file) {
+            if (file.size > 50 * 1024 * 1024) {
+                setError('File size exceeds 50MB limit. Please upload a smaller image.')
+                return
+            }
             setPersonFile(file)
             setPersonPreview(URL.createObjectURL(file))
             setGeneratedImage(null)
@@ -29,6 +33,10 @@ export default function VirtualTryOnClient() {
     const handleGarmentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
         if (file) {
+            if (file.size > 50 * 1024 * 1024) {
+                setError('File size exceeds 50MB limit. Please upload a smaller image.')
+                return
+            }
             setGarmentFile(file)
             setGarmentPreview(URL.createObjectURL(file))
             setGeneratedImage(null)

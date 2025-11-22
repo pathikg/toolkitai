@@ -18,7 +18,30 @@ export default function PodcastCreatorClient() {
     const [topic, setTopic] = useState('')
     const [language, setLanguage] = useState('en-US')
     const [isLoading, setIsLoading] = useState(false)
+    const [loadingStep, setLoadingStep] = useState('')
     const [error, setError] = useState<string | null>(null)
+
+    useEffect(() => {
+        if (!isLoading) {
+            setLoadingStep('')
+            return
+        }
+
+        setLoadingStep('Writing script...')
+
+        const timeout1 = setTimeout(() => {
+            setLoadingStep('Generating voiceover...')
+        }, 4000)
+
+        const timeout2 = setTimeout(() => {
+            setLoadingStep('Finalizing audio...')
+        }, 12000)
+
+        return () => {
+            clearTimeout(timeout1)
+            clearTimeout(timeout2)
+        }
+    }, [isLoading])
 
     const LANGUAGES = [
         { code: 'ar-EG', name: 'Arabic (Egyptian)' },
@@ -161,7 +184,7 @@ export default function PodcastCreatorClient() {
                             {isLoading ? (
                                 <>
                                     <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                                    Producing Podcast...
+                                    {loadingStep || 'Producing Podcast...'}
                                 </>
                             ) : (
                                 <>

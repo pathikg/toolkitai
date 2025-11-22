@@ -19,6 +19,10 @@ export default function FaceSwapClient() {
     const handleSourceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
         if (file) {
+            if (file.size > 50 * 1024 * 1024) {
+                setError('File size exceeds 50MB limit. Please upload a smaller image.')
+                return
+            }
             setSourceFile(file)
             setSourcePreview(URL.createObjectURL(file))
             setGeneratedImage(null)
@@ -29,6 +33,10 @@ export default function FaceSwapClient() {
     const handleTargetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
         if (file) {
+            if (file.size > 50 * 1024 * 1024) {
+                setError('File size exceeds 50MB limit. Please upload a smaller image.')
+                return
+            }
             setTargetFile(file)
             setTargetPreview(URL.createObjectURL(file))
             setGeneratedImage(null)
