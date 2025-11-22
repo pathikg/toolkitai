@@ -1,6 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { LucideIcon } from 'lucide-react'
-import Link from 'next/link'
 
 interface ToolCardProps {
   name: string
@@ -8,12 +7,19 @@ interface ToolCardProps {
   icon: LucideIcon
   href: string
   featured?: boolean
+  onClick?: (href: string) => void
 }
 
-export function ToolCard({ name, description, icon: Icon, href, featured = false }: ToolCardProps) {
+export function ToolCard({ name, description, icon: Icon, href, featured = false, onClick }: ToolCardProps) {
+  const handleClick = () => {
+    if (onClick) {
+      onClick(href)
+    }
+  }
+
   if (featured) {
     return (
-      <Link href={href} className="group">
+      <div onClick={handleClick} className="group cursor-pointer">
         <Card className="relative h-full overflow-hidden transition-all duration-400 ease-out hover:shadow-[0_20px_40px_rgb(0,0,0,0.06)] hover:-translate-y-1.5 border border-gray-100 hover:border-indigo-200 cursor-pointer bg-white">
           {/* Gradient Glow Effect on Hover */}
           <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/50 via-transparent to-purple-50/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
@@ -34,12 +40,12 @@ export function ToolCard({ name, description, icon: Icon, href, featured = false
             </div>
           </CardContent>
         </Card>
-      </Link>
+      </div>
     )
   }
 
   return (
-    <Link href={href} className="group">
+    <div onClick={handleClick} className="group cursor-pointer">
       <Card className="relative h-full overflow-hidden transition-all duration-300 ease-out hover:shadow-lg hover:-translate-y-1 hover:border-indigo-200 cursor-pointer bg-white border-gray-100">
         {/* Subtle Glow on Hover */}
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/30 via-transparent to-purple-50/20 opacity-0 group-hover:opacity-100 transition-opacity duration-400 pointer-events-none" />
@@ -56,7 +62,7 @@ export function ToolCard({ name, description, icon: Icon, href, featured = false
           <CardDescription className="text-sm leading-relaxed text-gray-600">{description}</CardDescription>
         </CardContent>
       </Card>
-    </Link>
+    </div>
   )
 }
 

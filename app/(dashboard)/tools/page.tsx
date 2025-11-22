@@ -1,12 +1,64 @@
+'use client'
+
 import { Navbar } from '@/components/Navbar'
 import { ToolCard } from '@/components/ToolCard'
+import { LoginModal } from '@/components/LoginModal'
 import { Sparkles, Video, Clock } from 'lucide-react'
 import { availableTools, upcomingTools } from '@/lib/tools-data'
+import { createClient } from '@/lib/supabase/client'
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 export default function ToolsPage() {
+  const router = useRouter()
+  const supabase = createClient()
+  const [user, setUser] = useState<any>(null)
+  const [showLoginModal, setShowLoginModal] = useState(false)
+  const [pendingToolHref, setPendingToolHref] = useState<string | null>(null)
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      setUser(user)
+    }
+
+    checkAuth()
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+      if (session?.user && pendingToolHref) {
+        // User just logged in, redirect to the tool they wanted
+        router.push(pendingToolHref)
+        setPendingToolHref(null)
+        setShowLoginModal(false)
+      }
+    })
+
+    return () => subscription.unsubscribe()
+  }, [supabase.auth, router, pendingToolHref])
+
+  const handleToolClick = (href: string) => {
+    if (!user) {
+      // User not authenticated, show login modal
+      setPendingToolHref(href)
+      setShowLoginModal(true)
+    } else {
+      // User authenticated, navigate directly
+      router.push(href)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-mesh">
       <Navbar />
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => {
+          setShowLoginModal(false)
+          setPendingToolHref(null)
+        }}
+        redirectAfterLogin={pendingToolHref || '/tools'}
+      />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}
         <div className="text-center mb-12">
@@ -38,6 +90,7 @@ export default function ToolsPage() {
                 icon={tool.icon}
                 href={tool.href}
                 featured={true}
+                onClick={handleToolClick}
               />
             ))}
           </div>
