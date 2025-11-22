@@ -15,7 +15,8 @@ import {
   Mic
 } from 'lucide-react'
 
-const featuredTools = [
+// Available Tools - Ready to use
+const availableTools = [
   {
     id: 'virtual-try-on',
     name: 'Virtual Try-On',
@@ -23,7 +24,6 @@ const featuredTools = [
     icon: Shirt,
     href: '/tools/virtual-try-on',
     category: 'image' as const,
-    featured: true,
   },
   {
     id: 'bg-removal',
@@ -32,16 +32,6 @@ const featuredTools = [
     icon: Eraser,
     href: '/tools/bg-removal',
     category: 'image' as const,
-    featured: true,
-  },
-  {
-    id: 'podcast-creator',
-    name: 'AI Podcast Creator',
-    description: 'Generate grounded podcast dialogues between Emily and Mark on any topic.',
-    icon: Mic,
-    href: '/tools/podcast-creator',
-    category: 'audio' as const,
-    featured: true,
   },
   {
     id: 'face-swap',
@@ -50,69 +40,66 @@ const featuredTools = [
     icon: Users,
     href: '/tools/face-swap',
     category: 'image' as const,
-    featured: true,
   },
+  {
+    id: 'podcast-creator',
+    name: 'AI Podcast Creator',
+    description: 'Generate grounded podcast dialogues between Emily and Mark on any topic.',
+    icon: Mic,
+    href: '/tools/podcast-creator',
+    category: 'audio' as const,
+  },
+]
+
+// Coming Soon - Tools in development
+const upcomingTools = [
   {
     id: 'gif-maker',
     name: 'GIF Maker',
     description: 'Create animated GIFs from videos or images with custom settings.',
     icon: FileImage,
-    href: '/tools/gif-maker',
     category: 'video' as const,
-    featured: true,
   },
   {
     id: 'mugshot-maker',
     name: 'Mugshot Generator',
     description: 'Generate realistic mugshot-style photos with AI technology.',
     icon: Camera,
-    href: '/tools/mugshot-maker',
     category: 'image' as const,
-    featured: true,
   },
   {
     id: 'poem-generator',
     name: 'Poem Generator',
     description: 'Create beautiful poems instantly using advanced AI language models.',
     icon: PenTool,
-    href: '/tools/poem-generator',
     category: 'text' as const,
-    featured: true,
   },
-]
-
-const allTools = [
-  ...featuredTools,
   {
     id: 'video-enhance',
     name: 'Video Enhancer',
-    description: 'Enhance video quality with AI upscaling',
+    description: 'Enhance video quality with AI upscaling and restoration.',
     icon: Video,
-    href: '/tools/video-enhance',
     category: 'video' as const,
   },
   {
     id: 'image-upscale',
     name: 'Image Upscaler',
-    description: 'Upscale images without quality loss',
+    description: 'Upscale images without quality loss using AI enhancement.',
     icon: Wand2,
-    href: '/tools/image-upscale',
     category: 'image' as const,
   },
   {
     id: 'voice-clone',
     name: 'Voice Cloner',
-    description: 'Clone and synthesize voices with AI',
+    description: 'Clone and synthesize voices with AI technology.',
     icon: Music,
-    href: '/tools/voice-clone',
     category: 'audio' as const,
   },
   {
     id: 'text-summarize',
     name: 'Text Summarizer',
-    description: 'Summarize long texts intelligently',
+    description: 'Summarize long texts intelligently with AI.',
     icon: Type,
-    href: '/tools/text-summarize',
     category: 'text' as const,
   },
 ]
@@ -137,14 +124,14 @@ export default function ToolsPage() {
           </p>
         </div>
 
-        {/* Featured Tools Section */}
+        {/* Available Tools Section */}
         <section className="mb-16">
           <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
             <Sparkles className="w-6 h-6 text-indigo-600" />
-            Featured Tools
+            Available Now
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featuredTools.map((tool) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {availableTools.map((tool) => (
               <ToolCard
                 key={tool.id}
                 name={tool.name}
@@ -157,18 +144,30 @@ export default function ToolsPage() {
           </div>
         </section>
 
-        {/* All Tools Grid */}
+        {/* Upcoming Tools Section */}
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">All Tools</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+            <Video className="w-6 h-6 text-purple-600" />
+            Coming Soon
+          </h2>
+          <p className="text-gray-600 mb-6">
+            These tools are currently in development and will be available soon!
+          </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {allTools.map((tool) => (
-              <ToolCard
-                key={tool.id}
-                name={tool.name}
-                description={tool.description}
-                icon={tool.icon}
-                href={tool.href}
-              />
+            {upcomingTools.map((tool) => (
+              <div key={tool.id} className="relative">
+                <div className="absolute top-4 right-4 z-10 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+                  Coming Soon
+                </div>
+                <div className="opacity-60 pointer-events-none">
+                  <ToolCard
+                    name={tool.name}
+                    description={tool.description}
+                    icon={tool.icon}
+                    href="#"
+                  />
+                </div>
+              </div>
             ))}
           </div>
         </section>
