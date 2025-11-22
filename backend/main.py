@@ -481,31 +481,47 @@ async def celebrity_selfie(
         client = genai.Client(api_key=api_key)
         
         # Base prompt
-        prompt = """Celebrity Selfie Face Swap Task:
-        1. Analyze the input images.
-        2. The FIRST image provided is the USER'S FACE (the face to be copied).
-        3. The SECOND image provided is the CELEBRITY IMAGE (the image to receive the face).
-        4. Replace the face in the CELEBRITY image with the face from the USER image.
-        5. CRITICAL: Keep the CELEBRITY image's background, lighting, body pose, hair, and style EXACTLY as they are. Only change the facial features to match the USER person.
-        6. Blend the user's face naturally into the celebrity image, adjusting skin tone and lighting to match the scene.
-        7. Ensure high photorealism and natural looking result.
-        8. Go all out on quality and realism to make it look like the user is actually in the celebrity's photo.
+        prompt = """Selfie Task:
+Analyze the user's selfie photo (FIRST IMAGE) and the celebrity image (SECOND IMAGE).
+The goal is to generate a new image where the user and the celebrity appear to be taking a selfie together, seamlessly integrated into the user's original environment.
+Here's how to achieve it:
+Extract and Isolate: Isolate the user from their background in the FIRST IMAGE and the celebrity from their background in the SECOND IMAGE.
+Environmental Alignment: The celebrity must be inserted naturally and realistically into the user's original environment (background, lighting, composition) from the FIRST IMAGE.
+Pose and Placement: Position the celebrity alongside the user, as if they are both genuinely in the same photo. The celebrity should be facing the camera, with appropriate perspective and scale relative to the user.
+Seamless Integration: Adjust the celebrity's lighting, shadows, skin tones, and overall aesthetic to perfectly match the lighting conditions, time of day, and ambient light of the user's selfie environment. The integration must be so flawless that it appears they were always together in the original shot.
+Realistic Interaction: Ensure the poses and expressions suggest a natural, spontaneous selfie moment.
+High Photo-realism: The final image must be of extremely high quality, realistic, and completely believable, with no visible seams, artifacts, or inconsistencies that betray the composite nature. It should look like an authentic, single photograph taken at that moment.
+Match Camera Angle and Focal Length: Ensure the perspective, focal length, and general camera characteristics of the celebrity image align with those of the user's selfie
+
+NOTE:
+- DO NOT ALTER THE USER'S SELFIE PHOTO IN ANY WAY. VERY IMPORTANT.
+        """
+
+        prompt = prompt + f"""
+        Additional User Instructions while adding the celebrity to the selfie:
+        {custom_prompt}
         """
         
-        # Add custom prompt if provided
-        if custom_prompt and custom_prompt.strip():
-            prompt += f"\n\n9. ADDITIONAL USER INSTRUCTIONS: {custom_prompt.strip()}"
-            logger.info(f"Added custom instructions to prompt: {custom_prompt.strip()}")
-
         logger.info("Sending request to Gemini API for Celebrity Selfie...")
         response = client.models.generate_content(
-            model="gemini-2.5-flash-image",
-            contents=[prompt, source_pil, target_pil],
+            model="gemini-3-pro-image-preview",
+            contents=[source_pil, target_pil, prompt],
             config=types.GenerateContentConfig(
                 response_modalities=["IMAGE"],
                 image_config=types.ImageConfig(
                     aspect_ratio=aspect_ratio
-                )
+                ),
+                safety_settings=[
+                    types.SafetySetting(
+                        category=types.HarmCategory.HARM_CATEGORY_HARASSMENT,
+                        threshold=types.HarmBlockThreshold.BLOCK_ONLY_HIGH
+                    ),
+                    # Sometimes face swaps trigger "Sexually Explicit" falsely due to skin exposure
+                    types.SafetySetting(
+                        category=types.HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+                        threshold=types.HarmBlockThreshold.BLOCK_ONLY_HIGH
+                    ),
+                ]
             )
         )
         logger.info("Received response from Gemini API")
