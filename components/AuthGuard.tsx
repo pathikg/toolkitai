@@ -25,9 +25,9 @@ export function AuthGuard({ children, fallback }: AuthGuardProps) {
         const {
           data: { user },
         } = await supabase.auth.getUser()
-        
+
         setUser(user)
-        
+
         if (!user) {
           // Show login modal instead of redirecting
           setShowLoginModal(true)
@@ -77,29 +77,19 @@ export function AuthGuard({ children, fallback }: AuthGuardProps) {
 
   if (!user) {
     return (
-      <>
-        <LoginModal 
-          isOpen={showLoginModal} 
+      <div className="relative">
+        {/* Render children in background (blurred) */}
+        <div className="blur-sm pointer-events-none select-none">
+          {children}
+        </div>
+
+        {/* Login modal overlay */}
+        <LoginModal
+          isOpen={showLoginModal}
           onClose={handleCloseModal}
           redirectAfterLogin={pathname}
         />
-        <div className="min-h-screen flex items-center justify-center bg-mesh">
-          <div className="text-center max-w-md mx-auto p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              Authentication Required
-            </h2>
-            <p className="text-gray-600 mb-6">
-              Please sign in to access this tool.
-            </p>
-            <button
-              onClick={() => setShowLoginModal(true)}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-6 rounded-lg transition-colors"
-            >
-              Sign In
-            </button>
-          </div>
-        </div>
-      </>
+      </div>
     )
   }
 

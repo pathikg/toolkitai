@@ -28,7 +28,7 @@ export function LoginModal({ isOpen, onClose, redirectAfterLogin }: LoginModalPr
   const handleGoogleSignIn = async () => {
     setIsLoading(true)
     try {
-      const redirectUrl = redirectAfterLogin 
+      const redirectUrl = redirectAfterLogin
         ? `${window.location.origin}/callback?next=${encodeURIComponent(redirectAfterLogin)}`
         : `${window.location.origin}/callback`
 
@@ -52,12 +52,12 @@ export function LoginModal({ isOpen, onClose, redirectAfterLogin }: LoginModalPr
   if (!isOpen) return null
 
   return (
-    <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-md animate-fade-in"
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md animate-fade-in"
       onClick={onClose}
     >
       {/* Modal */}
-      <div 
+      <div
         className="relative bg-white rounded-3xl shadow-2xl w-full max-w-md p-8 animate-fade-in"
         onClick={(e) => e.stopPropagation()}
       >
