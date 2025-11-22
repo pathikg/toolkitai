@@ -135,6 +135,19 @@ export default function CelebritySelfieClient() {
     ]
 
     const [isSampleLoading, setIsSampleLoading] = useState(false)
+    const [imageLoadErrors, setImageLoadErrors] = useState<Set<string>>(new Set())
+
+    // Helper function to get proxy URL for images
+    const getProxyUrl = (url: string): string => {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://100.30.3.16'
+        return `${apiUrl}/api/proxy-image?url=${encodeURIComponent(url)}`
+    }
+
+    // Handle image load errors for thumbnails
+    const handleImageError = (url: string) => {
+        setImageLoadErrors(prev => new Set(prev).add(url))
+        setError('Failed to load sample image. Please try selecting it again or upload manually.')
+    }
 
     const handleSampleSelect = async (url: string, type: 'user' | 'celebrity') => {
         setIsSampleLoading(true)
@@ -147,23 +160,33 @@ export default function CelebritySelfieClient() {
 
             const response = await fetch(proxyUrl)
 
-            if (!response.ok) throw new Error(`HTTP ${response.status}`)
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: Failed to fetch image`)
+            }
 
             const blob = await response.blob()
             const file = new File([blob], `sample-${type}.jpg`, { type: blob.type || 'image/jpeg' })
 
+            // Create object URL for preview
+            const previewUrl = URL.createObjectURL(blob)
+
             if (type === 'user') {
                 setUserFile(file)
-                setUserPreview(url)
+                setUserPreview(previewUrl)
             } else {
                 setCelebrityFile(file)
-                setCelebrityPreview(url)
+                setCelebrityPreview(previewUrl)
             }
             setGeneratedImage(null)
+            // Remove from error set if it was there
+            setImageLoadErrors(prev => {
+                const next = new Set(prev)
+                next.delete(url)
+                return next
+            })
         } catch (err: any) {
             console.error('Error loading sample image:', err)
-            // Don't show error - silently fail and user can still manually upload
-            // The preview will still show in the UI
+            setError(err.message || 'Failed to load sample image. Please enable CORS on your S3 bucket or upload manually.')
         } finally {
             setIsSampleLoading(false)
         }
@@ -228,12 +251,19 @@ export default function CelebritySelfieClient() {
                                         }}
                                         className="relative aspect-square rounded-lg overflow-hidden border-2 border-transparent hover:border-indigo-500 transition-all"
                                     >
-                                        <img
-                                            src={url}
-                                            alt={`User ${i + 1}`}
-                                            className="w-full h-full object-cover pointer-events-none"
-                                            loading="lazy"
-                                        />
+                                        {imageLoadErrors.has(url) ? (
+                                            <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400 text-xs text-center p-2">
+                                                Failed to load
+                                            </div>
+                                        ) : (
+                                            <img
+                                                src={getProxyUrl(url)}
+                                                alt={`User ${i + 1}`}
+                                                className="w-full h-full object-cover pointer-events-none"
+                                                loading="lazy"
+                                                onError={() => handleImageError(url)}
+                                            />
+                                        )}
                                     </button>
                                 ))}
                             </div>
@@ -297,12 +327,19 @@ export default function CelebritySelfieClient() {
                                         }}
                                         className="relative aspect-square rounded-lg overflow-hidden border-2 border-transparent hover:border-indigo-500 transition-all"
                                     >
-                                        <img
-                                            src={url}
-                                            alt={`Celebrity ${i + 1}`}
-                                            className="w-full h-full object-cover pointer-events-none"
-                                            loading="lazy"
-                                        />
+                                        {imageLoadErrors.has(url) ? (
+                                            <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400 text-xs text-center p-2">
+                                                Failed to load
+                                            </div>
+                                        ) : (
+                                            <img
+                                                src={getProxyUrl(url)}
+                                                alt={`Celebrity ${i + 1}`}
+                                                className="w-full h-full object-cover pointer-events-none"
+                                                loading="lazy"
+                                                onError={() => handleImageError(url)}
+                                            />
+                                        )}
                                     </button>
                                 ))}
                             </div>
