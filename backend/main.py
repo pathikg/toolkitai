@@ -22,14 +22,27 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-def add_watermark(image: Image.Image, text: str = "toolkitai.io") -> Image.Image:
-    """Add watermark to image in bottom-right corner"""
-    watermarked = image.copy()
-    draw = ImageDraw.Draw(watermarked)
+def add_watermark(image_path: str, text: str = "toolkitai.io") -> None:
+    """
+    Add watermark to image file in-place
+    Args:
+        image_path: Path to the image file
+        text: Watermark text
+    """
+    # Load the image
+    img = Image.open(image_path)z
     
-    width, height = watermarked.size
+    # Convert to RGB if needed (most common format)
+    if img.mode not in ('RGB', 'RGBA'):
+        img = img.convert('RGB')
+    
+    # Create drawing context
+    draw = ImageDraw.Draw(img)
+    
+    width, height = img.size
     font_size = max(12, int(width * 0.02))
     
+    # Try to load a nice font
     try:
         font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", font_size)
     except:
@@ -38,20 +51,31 @@ def add_watermark(image: Image.Image, text: str = "toolkitai.io") -> Image.Image
         except:
             font = ImageFont.load_default()
     
+    # Get text dimensions
     bbox = draw.textbbox((0, 0), text, font=font)
     text_width = bbox[2] - bbox[0]
     text_height = bbox[3] - bbox[1]
     
+    # Calculate position (bottom-right with padding)
     padding = max(10, int(width * 0.01))
     x = width - text_width - padding
     y = height - text_height - padding
     
+    # Draw semi-transparent background
     bg_padding = 5
-    background_bbox = [x - bg_padding, y - bg_padding, x + text_width + bg_padding, y + text_height + bg_padding]
-    draw.rectangle(background_bbox, fill=(0, 0, 0, 180))
-    draw.text((x, y), text, fill=(255, 255, 255, 255), font=font)
+    background_bbox = [
+        x - bg_padding,
+        y - bg_padding,
+        x + text_width + bg_padding,
+        y + text_height + bg_padding
+    ]
+    draw.rectangle(background_bbox, fill=(0, 0, 0))
     
-    return watermarked
+    # Draw white text
+    draw.text((x, y), text, fill=(255, 255, 255), font=font)
+    
+    # Save back to the same file
+    img.save(image_path)
 
 app = FastAPI(title="ToolkitAI API")
 
@@ -85,17 +109,23 @@ async def bg_removal(file: UploadFile = File(...)):
         # Remove background using rembg
         output_data = remove(image_data)
         
-        # Add watermark
-        img = Image.open(io.BytesIO(output_data))
-        watermarked_img = add_watermark(img)
+        # Save to temp file, add watermark, read back
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_file:
+            tmp_path = tmp_file.name
+            tmp_file.write(output_data)
         
-        # Convert back to bytes
-        img_byte_arr = io.BytesIO()
-        watermarked_img.save(img_byte_arr, format='PNG')
-        img_byte_arr = img_byte_arr.getvalue()
+        # Add watermark in-place
+        add_watermark(tmp_path)
+        
+        # Read the watermarked image
+        with open(tmp_path, "rb") as f:
+            watermarked_data = f.read()
+        
+        # Clean up
+        os.remove(tmp_path)
         
         logger.info("Background removal successful with watermark")
-        return Response(content=img_byte_arr, media_type="image/png")
+        return Response(content=watermarked_data, media_type="image/png")
     except Exception as e:
         logger.error(f"Error in background removal: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -209,15 +239,16 @@ async def virtual_try_on(
                 if part.inline_data:
                     img = part.as_image()
                     
-                    # Add watermark
-                    watermarked_img = add_watermark(img)
-                    
-                    # Save to a temporary file, then read it back as bytes
+                    # Save to a temporary file
                     with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_file:
                         tmp_path = tmp_file.name
                     
-                    watermarked_img.save(tmp_path)
+                    img.save(tmp_path)
                     
+                    # Add watermark in-place
+                    add_watermark(tmp_path)
+                    
+                    # Read back the watermarked image
                     with open(tmp_path, "rb") as f:
                         generated_image_bytes = f.read()
                     
@@ -343,14 +374,16 @@ async def face_swap(
                 if part.inline_data:
                     img = part.as_image()
                     
-                    # Add watermark
-                    watermarked_img = add_watermark(img)
-                    
+                    # Save to a temporary file
                     with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_file:
                         tmp_path = tmp_file.name
                     
-                    watermarked_img.save(tmp_path)
+                    img.save(tmp_path)
                     
+                    # Add watermark in-place
+                    add_watermark(tmp_path)
+                    
+                    # Read back the watermarked image
                     with open(tmp_path, "rb") as f:
                         generated_image_bytes = f.read()
                     
