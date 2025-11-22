@@ -46,6 +46,14 @@ export const availableTools = [
         href: '/tools/podcast-creator',
         category: 'audio' as const,
     },
+    {
+        id: 'celebrity-selfie',
+        name: 'Selfie with Celebrity',
+        description: 'Create amazing selfies with your favorite celebrities using AI face swap.',
+        icon: Camera,
+        href: '/tools/celebrity-selfie',
+        category: 'image' as const,
+    },
 ]
 
 // Coming Soon - Tools in development

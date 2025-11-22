@@ -1,4 +1,4 @@
-from fastapi import FastAPI, File, UploadFile, Response, HTTPException
+from fastapi import FastAPI, File, UploadFile, Response, HTTPException, Form
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from rembg import remove
@@ -412,6 +412,148 @@ async def face_swap(
         raise he
     except Exception as e:
         logger.error(f"Unexpected error in face swap: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/celebrity-selfie")
+async def celebrity_selfie(
+    source_image: UploadFile = File(...),
+    target_image: UploadFile = File(...),
+    custom_prompt: str = Form("")
+):
+    """
+    Celebrity Selfie endpoint - uses same face-swap logic
+    User uploads their photo (source) and celebrity photo (target)
+    Optional custom_prompt for specific instructions
+    """
+    try:
+        logger.info(f"Processing celebrity selfie request. User: {source_image.filename}, Celebrity: {target_image.filename}, Custom prompt: {custom_prompt}")
+        
+        # Read images
+        source_bytes = await source_image.read()
+        target_bytes = await target_image.read()
+        
+        source_pil = Image.open(io.BytesIO(source_bytes))
+        target_pil = Image.open(io.BytesIO(target_bytes))
+        
+        # Calculate aspect ratio of target image to match output
+        width, height = target_pil.size
+        aspect_ratio_map = {
+            (1, 1): "1:1",
+            (2, 3): "2:3",
+            (3, 2): "3:2",
+            (3, 4): "3:4",
+            (4, 3): "4:3",
+            (4, 5): "4:5",
+            (5, 4): "5:4",
+            (9, 16): "9:16",
+            (16, 9): "16:9",
+            (21, 9): "21:9",
+        }
+        
+        # Find closest aspect ratio
+        def gcd(a, b):
+            while b:
+                a, b = b, a % b
+            return a
+        
+        divisor = gcd(width, height)
+        ratio_w = width // divisor
+        ratio_h = height // divisor
+        
+        # Try to find exact match or closest
+        aspect_ratio = "1:1"  # default
+        if (ratio_w, ratio_h) in aspect_ratio_map:
+            aspect_ratio = aspect_ratio_map[(ratio_w, ratio_h)]
+        else:
+            # Find closest based on ratio value
+            target_ratio = width / height
+            closest_key = min(aspect_ratio_map.keys(), key=lambda k: abs((k[0]/k[1]) - target_ratio))
+            aspect_ratio = aspect_ratio_map[closest_key]
+        
+        logger.info(f"Detected aspect ratio for celebrity image: {aspect_ratio}")
+        
+        api_key = os.getenv("GOOGLE_API_KEY")
+        if not api_key:
+            logger.error("GOOGLE_API_KEY not set")
+            raise HTTPException(status_code=500, detail="GOOGLE_API_KEY not set")
+
+        client = genai.Client(api_key=api_key)
+        
+        # Base prompt
+        prompt = """Celebrity Selfie Face Swap Task:
+        1. Analyze the input images.
+        2. The FIRST image provided is the USER'S FACE (the face to be copied).
+        3. The SECOND image provided is the CELEBRITY IMAGE (the image to receive the face).
+        4. Replace the face in the CELEBRITY image with the face from the USER image.
+        5. CRITICAL: Keep the CELEBRITY image's background, lighting, body pose, hair, and style EXACTLY as they are. Only change the facial features to match the USER person.
+        6. Blend the user's face naturally into the celebrity image, adjusting skin tone and lighting to match the scene.
+        7. Ensure high photorealism and natural looking result.
+        8. Go all out on quality and realism to make it look like the user is actually in the celebrity's photo.
+        """
+        
+        # Add custom prompt if provided
+        if custom_prompt and custom_prompt.strip():
+            prompt += f"\n\n9. ADDITIONAL USER INSTRUCTIONS: {custom_prompt.strip()}"
+            logger.info(f"Added custom instructions to prompt: {custom_prompt.strip()}")
+
+        logger.info("Sending request to Gemini API for Celebrity Selfie...")
+        response = client.models.generate_content(
+            model="gemini-2.5-flash-image",
+            contents=[prompt, source_pil, target_pil],
+            config=types.GenerateContentConfig(
+                response_modalities=["IMAGE"],
+                image_config=types.ImageConfig(
+                    aspect_ratio=aspect_ratio
+                )
+            )
+        )
+        logger.info("Received response from Gemini API")
+        
+        generated_image_bytes = None
+        
+        if response.parts:
+            for part in response.parts:
+                if part.inline_data:
+                    img = part.as_image()
+                    
+                    # Save to a temporary file
+                    with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_file:
+                        tmp_path = tmp_file.name
+                    
+                    img.save(tmp_path)
+                    
+                    # Add watermark in-place
+                    add_watermark(tmp_path)
+                    
+                    # Read back the watermarked image
+                    with open(tmp_path, "rb") as f:
+                        generated_image_bytes = f.read()
+                    
+                    os.remove(tmp_path)
+                    break
+        
+        if not generated_image_bytes:
+            text_response = ""
+            if response.parts:
+                for part in response.parts:
+                    if part.text:
+                        text_response += part.text
+            
+            logger.warning(f"No image generated. Text response: {text_response}")
+            
+            if text_response:
+                raise HTTPException(status_code=400, detail=f"Generation failed: {text_response}")
+            else:
+                raise HTTPException(status_code=500, detail="Failed to generate image. The model might have failed to process the request.")
+             
+        logger.info("Celebrity selfie successful, returning image.")
+        return Response(content=generated_image_bytes, media_type="image/png")
+        
+    except HTTPException as he:
+        logger.error(f"HTTP Exception in celebrity selfie: {he.detail}")
+        raise he
+    except Exception as e:
+        logger.error(f"Unexpected error in celebrity selfie: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 class PodcastRequest(BaseModel):
