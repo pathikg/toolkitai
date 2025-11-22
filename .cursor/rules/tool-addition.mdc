@@ -1,4 +1,4 @@
 ---
 alwaysApply: true
 ---
-whenever we create a new feature or tool always make sure you handle it very well from FE and backend from both sides since we do mention tools on our landing page and home page, ngnix conf in backend also make sure we are not violating any TOS or if we have to then suggest if rules need to be modified or TOS needs to be modified
+whenever we create a new feature or tool always make sure you handle it very well from FE and backend from both sides since we do mention tools on our landing page and home page, middleware in code, ngnix conf in backend also make sure we are not violating any TOS or if we have to then suggest if rules need to be modified or TOS needs to be modified

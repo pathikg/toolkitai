@@ -55,7 +55,7 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Link href="/login" className="group">
+            <Link href="/tools/virtual-try-on" className="group">
               <Card className="h-full transition-all hover:shadow-xl hover:scale-[1.02] border-2 hover:border-indigo-300 cursor-pointer">
                 <CardHeader className="space-y-3">
                   <div className="bg-gradient-to-br from-indigo-500 to-purple-600 p-4 rounded-xl w-fit group-hover:scale-110 transition-transform">
@@ -73,7 +73,7 @@ export default function Home() {
               </Card>
             </Link>
 
-            <Link href="/login" className="group">
+            <Link href="/tools/bg-removal" className="group">
               <Card className="h-full transition-all hover:shadow-xl hover:scale-[1.02] border-2 hover:border-indigo-300 cursor-pointer">
                 <CardHeader className="space-y-3">
                   <div className="bg-gradient-to-br from-indigo-500 to-purple-600 p-4 rounded-xl w-fit group-hover:scale-110 transition-transform">
@@ -91,7 +91,7 @@ export default function Home() {
               </Card>
             </Link>
 
-            <Link href="/login" className="group">
+            <Link href="/tools/face-swap" className="group">
               <Card className="h-full transition-all hover:shadow-xl hover:scale-[1.02] border-2 hover:border-indigo-300 cursor-pointer">
                 <CardHeader className="space-y-3">
                   <div className="bg-gradient-to-br from-indigo-500 to-purple-600 p-4 rounded-xl w-fit group-hover:scale-110 transition-transform">
@@ -109,7 +109,7 @@ export default function Home() {
               </Card>
             </Link>
 
-            <Link href="/login" className="group">
+            <Link href="/tools/podcast-creator" className="group">
               <Card className="h-full transition-all hover:shadow-xl hover:scale-[1.02] border-2 hover:border-indigo-300 cursor-pointer">
                 <CardHeader className="space-y-3">
                   <div className="bg-gradient-to-br from-indigo-500 to-purple-600 p-4 rounded-xl w-fit group-hover:scale-110 transition-transform">
@@ -125,6 +125,16 @@ export default function Home() {
                   </CardDescription>
                 </CardContent>
               </Card>
+            </Link>
+          </div>
+
+          {/* Load More Button */}
+          <div className="mt-8 text-center">
+            <Link href="/tools">
+              <Button size="lg" variant="outline" className="text-lg px-8 py-6 gap-2 hover:bg-indigo-50 hover:border-indigo-300 transition-all">
+                Explore All Tools
+                <ArrowRight className="w-5 h-5" />
+              </Button>
             </Link>
           </div>
         </div>
