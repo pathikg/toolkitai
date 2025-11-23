@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Loader2, RefreshCw, Upload, Download, Scissors } from 'lucide-react'
@@ -12,6 +12,109 @@ export default function HairstyleGridClient() {
     const [isLoading, setIsLoading] = useState(false)
     const [loadingStep, setLoadingStep] = useState('')
     const [error, setError] = useState<string | null>(null)
+
+    // Sample photos
+    const SAMPLE_PHOTOS = [
+        "https://media.wired.com/photos/64960586e416fd283a85c405/4:3/w_1592,h_1194,c_limit/Demis-Hassabis-Google-DeepMind-Business-1437358148.jpg",
+        "https://futureoflife.org/wp-content/uploads/2020/08/elon_musk_royal_society.jpg",
+        "https://upload.wikimedia.org/wikipedia/commons/1/19/January_2025_Official_Presidential_Portrait_of_Donald_J._Trump.jpg"
+    ]
+
+    const [isSampleLoading, setIsSampleLoading] = useState(false)
+    const [imageLoadErrors, setImageLoadErrors] = useState<Set<string>>(new Set())
+    const [imageCache, setImageCache] = useState<Map<string, string>>(new Map())
+
+    // Preload images with authentication
+    useEffect(() => {
+        const blobUrls: string[] = []
+
+        const preloadImages = async () => {
+            const newCache = new Map<string, string>()
+
+            for (const url of SAMPLE_PHOTOS) {
+                try {
+                    const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(url)}`
+                    const response = await fetch(proxyUrl, {
+                        credentials: 'include', // Ensure cookies are sent
+                    })
+
+                    if (response.ok) {
+                        const blob = await response.blob()
+                        const blobUrl = URL.createObjectURL(blob)
+                        blobUrls.push(blobUrl)
+                        newCache.set(url, blobUrl)
+                    } else {
+                        setImageLoadErrors((prev: Set<string>) => new Set(prev).add(url))
+                    }
+                } catch (err) {
+                    console.error(`Failed to preload image ${url}:`, err)
+                    setImageLoadErrors((prev: Set<string>) => new Set(prev).add(url))
+                }
+            }
+
+            setImageCache(newCache)
+        }
+
+        preloadImages()
+
+        // Cleanup blob URLs on unmount
+        return () => {
+            blobUrls.forEach(url => URL.revokeObjectURL(url))
+        }
+    }, [])
+
+    // Helper function to get proxy URL for images (use cached blob URL if available)
+    const getProxyUrl = (url: string): string | null => {
+        // Only return cached blob URL - never fall back to API route for <img> tags
+        if (imageCache.has(url)) {
+            return imageCache.get(url)!
+        }
+        // Return null if not cached yet (component will show placeholder)
+        return null
+    }
+
+    // Handle image load errors for thumbnails
+    const handleImageError = (url: string) => {
+        setImageLoadErrors(prev => new Set(prev).add(url))
+        setError('Failed to load sample image. Please try selecting it again or upload manually.')
+    }
+
+    const handleSampleSelect = async (url: string) => {
+        setIsSampleLoading(true)
+        setError(null)
+
+        try {
+            // Use Next.js API route (which handles auth and forwards to backend)
+            const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(url)}`
+
+            const response = await fetch(proxyUrl)
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: Failed to fetch image`)
+            }
+
+            const blob = await response.blob()
+            const file = new File([blob], `sample-photo.jpg`, { type: blob.type || 'image/jpeg' })
+
+            // Create object URL for preview
+            const previewUrl = URL.createObjectURL(blob)
+
+            setUserFile(file)
+            setUserPreview(previewUrl)
+            setGeneratedImage(null)
+            // Remove from error set if it was there
+            setImageLoadErrors(prev => {
+                const next = new Set(prev)
+                next.delete(url)
+                return next
+            })
+        } catch (err: any) {
+            console.error('Error loading sample image:', err)
+            setError(err.message || 'Failed to load sample image. Please try selecting it again or upload manually.')
+        } finally {
+            setIsSampleLoading(false)
+        }
+    }
 
     const validateImageFile = (file: File): string | null => {
         const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp']
@@ -122,8 +225,8 @@ export default function HairstyleGridClient() {
 
                             {!userPreview ? (
                                 // Upload State
-                                <div className="w-full max-w-md text-center">
-                                    <div className="relative group cursor-pointer">
+                                <div className="w-full max-w-md text-center px-4">
+                                    <div className="relative group cursor-pointer mb-6">
                                         <div className="absolute inset-0 bg-indigo-500/5 blur-2xl rounded-full group-hover:bg-indigo-500/10 transition-all duration-500" />
                                         <div className="relative bg-white border-2 border-dashed border-gray-200 rounded-2xl p-12 hover:border-indigo-500/50 hover:shadow-lg transition-all duration-300">
                                             <input
@@ -146,6 +249,45 @@ export default function HairstyleGridClient() {
                                             </div>
                                         </div>
                                     </div>
+
+                                    {/* Sample Images */}
+                                    {SAMPLE_PHOTOS.length > 0 && (
+                                        <div className="mt-8">
+                                            <p className="text-sm font-medium text-gray-700 mb-3">Or try a sample photo:</p>
+                                            <div className="grid grid-cols-3 gap-3">
+                                                {SAMPLE_PHOTOS.map((url, i) => (
+                                                    <button
+                                                        key={i}
+                                                        onClick={(e) => {
+                                                            e.preventDefault()
+                                                            e.stopPropagation()
+                                                            handleSampleSelect(url)
+                                                        }}
+                                                        disabled={isSampleLoading}
+                                                        className="relative aspect-square rounded-lg overflow-hidden border-2 border-transparent hover:border-indigo-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    >
+                                                        {imageLoadErrors.has(url) ? (
+                                                            <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400 text-xs text-center p-2">
+                                                                Failed to load
+                                                            </div>
+                                                        ) : getProxyUrl(url) ? (
+                                                            <img
+                                                                src={getProxyUrl(url)!}
+                                                                alt={`Sample ${i + 1}`}
+                                                                className="w-full h-full object-cover pointer-events-none"
+                                                                loading="lazy"
+                                                                onError={() => handleImageError(url)}
+                                                            />
+                                                        ) : (
+                                                            <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-300 text-xs text-center p-2">
+                                                                Loading...
+                                                            </div>
+                                                        )}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             ) : generatedImage ? (
                                 // Result Display
@@ -181,13 +323,18 @@ export default function HairstyleGridClient() {
                                         <Button
                                             onClick={handleGenerateGrid}
                                             size="lg"
-                                            disabled={isLoading}
+                                            disabled={isLoading || isSampleLoading}
                                             className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
                                         >
                                             {isLoading ? (
                                                 <>
                                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                                     {loadingStep || 'Processing...'}
+                                                </>
+                                            ) : isSampleLoading ? (
+                                                <>
+                                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                    Loading Sample...
                                                 </>
                                             ) : (
                                                 <>
