@@ -1,17 +1,16 @@
 'use client'
 
 import { createClient } from '@/lib/supabase/client'
-import { Button } from '@/components/ui/button'
-import { Sparkles, LogOut, User } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { Sparkles, User } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import type { User as SupabaseUser } from '@supabase/supabase-js'
+import { UserModal } from '@/components/UserModal'
 
 export function Navbar() {
-  const router = useRouter()
   const supabase = createClient()
   const [user, setUser] = useState<SupabaseUser | null>(null)
+  const [isUserModalOpen, setIsUserModalOpen] = useState(false)
 
   useEffect(() => {
     const getUser = async () => {
@@ -32,11 +31,6 @@ export function Navbar() {
     return () => subscription.unsubscribe()
   }, [supabase.auth])
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut()
-    router.push('/')
-  }
-
   return (
     <nav className="border-b border-gray-100 bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -51,28 +45,23 @@ export function Navbar() {
           </Link>
 
           {user && (
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2 text-sm">
-                <div className="bg-gradient-to-br from-indigo-100 to-purple-100 p-2 rounded-full">
-                  <User className="w-4 h-4 text-indigo-600" />
-                </div>
-                <span className="hidden sm:inline text-gray-700">
-                  {user.email}
-                </span>
-              </div>
-              <Button
-                onClick={handleSignOut}
-                variant="outline"
-                size="sm"
-                className="gap-2"
-              >
-                <LogOut className="w-4 h-4" />
-                <span className="hidden sm:inline">Sign Out</span>
-              </Button>
-            </div>
+            <button
+              onClick={() => setIsUserModalOpen(true)}
+              className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 hover:from-indigo-200 hover:to-purple-200 transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              aria-label="User menu"
+            >
+              <User className="w-5 h-5 text-indigo-600" />
+            </button>
           )}
         </div>
       </div>
+      {user && (
+        <UserModal
+          isOpen={isUserModalOpen}
+          onClose={() => setIsUserModalOpen(false)}
+          user={user}
+        />
+      )}
     </nav>
   )
 }
