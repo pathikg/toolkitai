@@ -864,16 +864,20 @@ async def podcast_creator(request: PodcastRequest):
 @app.get("/api/proxy-image")
 async def proxy_image(url: str):
     """
-    Proxy endpoint to fetch images from S3, bypassing CORS issues
+    Proxy endpoint to fetch images from S3 or external URLs, bypassing CORS issues
     """
     try:
-        # Validate URL is from our S3 bucket for security
-        if not url.startswith("https://s3.us-west-2.amazonaws.com/toolkitai.io/"):
-            raise HTTPException(status_code=400, detail="Invalid image URL")
+        # Validate URL format for security
+        if not url.startswith("http://") and not url.startswith("https://"):
+            raise HTTPException(status_code=400, detail="Invalid image URL format")
+        
+        # For S3 URLs, validate they're from our bucket
+        if url.startswith("https://s3.") and not url.startswith("https://s3.us-west-2.amazonaws.com/toolkitai.io/"):
+            raise HTTPException(status_code=400, detail="Invalid S3 URL - only toolkitai.io bucket allowed")
         
         logger.info(f"Proxying image request: {url}")
         
-        # Fetch image from S3
+        # Fetch image from URL
         with urllib.request.urlopen(url) as response:
             image_data = response.read()
             content_type = response.headers.get('Content-Type', 'image/jpeg')
