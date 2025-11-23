@@ -89,20 +89,20 @@ export function UserModal({ isOpen, onClose, user }: UserModalProps) {
         router.push('/')
     }
 
-    if (!isOpen) return null
-
     return (
         <>
             {/* Backdrop */}
-            <div
-                className="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm transition-opacity duration-300"
-                onClick={onClose}
-            />
+            {isOpen && (
+                <div
+                    className="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm transition-opacity duration-300"
+                    onClick={onClose}
+                />
+            )}
 
             {/* Sidebar */}
             <div
                 className={`fixed right-0 top-0 z-50 h-full w-full max-w-md bg-white shadow-2xl transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'
-                    }`}
+                    } ${!isOpen ? 'pointer-events-none' : ''}`}
                 onClick={(e: React.MouseEvent) => e.stopPropagation()}
             >
                 <div className="flex h-full flex-col overflow-y-auto">
