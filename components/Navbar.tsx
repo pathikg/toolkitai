@@ -39,7 +39,7 @@ export function Navbar() {
   }, [supabase.auth]);
 
   return (
-    <nav className="sticky top-0 z-50 px-4 sm:px-6 pt-4">
+    <nav className="sticky top-0 z-50 px-4 sm:px-6">
       <style jsx>{`
         @keyframes slideDown {
           from {
