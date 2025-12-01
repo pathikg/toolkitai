@@ -22,7 +22,12 @@ import {
   ReactCompareSliderImage,
 } from "react-compare-slider";
 import { SOLID_COLORS, BACKGROUND_IMAGES } from "./backgrounds";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 // ToolbarButton Component
 const ToolbarButton = ({
@@ -125,7 +130,9 @@ const FloatingToolbar = ({
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 flex-shrink-0">
               <Palette className="w-4 h-4 text-gray-600" />
-              <span className="text-sm font-medium text-gray-700 whitespace-nowrap">Background:</span>
+              <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                Background:
+              </span>
             </div>
 
             {/* Scrollable Color Row */}
@@ -133,10 +140,11 @@ const FloatingToolbar = ({
               {/* Transparent Option */}
               <button
                 onClick={() => onBgChange("transparent", "")}
-                className={`w-10 h-10 flex-shrink-0 rounded-lg border-2 flex items-center justify-center transition-all hover:scale-110 ${bgType === "transparent"
-                  ? "border-indigo-600 ring-2 ring-indigo-200 shadow-lg scale-105"
-                  : "border-gray-300 hover:border-indigo-400"
-                  }`}
+                className={`w-10 h-10 flex-shrink-0 rounded-lg border-2 flex items-center justify-center transition-all hover:scale-110 ${
+                  bgType === "transparent"
+                    ? "border-indigo-600 ring-2 ring-indigo-200 shadow-lg scale-105"
+                    : "border-gray-300 hover:border-indigo-400"
+                }`}
                 title="Transparent"
               >
                 <div className="w-8 h-8 bg-checkerboard rounded" />
@@ -147,10 +155,11 @@ const FloatingToolbar = ({
                 <button
                   key={color}
                   onClick={() => onBgChange("color", color)}
-                  className={`w-10 h-10 flex-shrink-0 rounded-lg border-2 transition-all hover:scale-110 ${bgType === "color" && bgValue === color
-                    ? "border-indigo-600 ring-2 ring-indigo-200 shadow-lg scale-105"
-                    : "border-white/80 hover:border-indigo-400 shadow-sm"
-                    }`}
+                  className={`w-10 h-10 flex-shrink-0 rounded-lg border-2 transition-all hover:scale-110 ${
+                    bgType === "color" && bgValue === color
+                      ? "border-indigo-600 ring-2 ring-indigo-200 shadow-lg scale-105"
+                      : "border-white/80 hover:border-indigo-400 shadow-sm"
+                  }`}
                   style={{ backgroundColor: color }}
                   title={color}
                 />
@@ -177,46 +186,48 @@ const FloatingToolbar = ({
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 flex-shrink-0">
               <ImageIcon className="w-4 h-4 text-gray-600" />
-              <span className="text-sm font-medium text-gray-700 whitespace-nowrap">Background Image:</span>
+              <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                Background Image:
+              </span>
             </div>
 
             {/* Scrollable Images Row */}
             <div className="flex gap-2 overflow-x-auto scrollbar-hide flex-1 p-1">
-  <TooltipProvider>
-    {BACKGROUND_IMAGES.map((img) => (
-      <Tooltip key={img.id}>
-        <TooltipTrigger asChild>
-          <button
-            onClick={() => {
-              onBgChange("image", img.url);
-              onModeChange("customize");
-            }}
-            className={`relative w-16 h-10 flex-shrink-0 rounded-lg overflow-hidden border-2 transition-all hover:scale-105 ${
-              bgType === "image" && bgValue === img.url
-                ? "border-indigo-600 ring-2 ring-indigo-100 shadow-md scale-105"
-                : "border-gray-200 hover:border-indigo-400"
-            }`}
-          >
-            <img
-              src={img.url}
-              alt={img.name}
-              className="w-full h-full object-cover"
-            />
-          </button>
-        </TooltipTrigger>
+              <TooltipProvider>
+                {BACKGROUND_IMAGES.map((img) => (
+                  <Tooltip key={img.id}>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={() => {
+                          onBgChange("image", img.url);
+                          onModeChange("customize");
+                        }}
+                        className={`relative w-16 h-10 flex-shrink-0 rounded-lg overflow-hidden border-2 transition-all hover:scale-105 ${
+                          bgType === "image" && bgValue === img.url
+                            ? "border-indigo-600 ring-2 ring-indigo-100 shadow-md scale-105"
+                            : "border-gray-200 hover:border-indigo-400"
+                        }`}
+                      >
+                        <img
+                          src={img.url}
+                          alt={img.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </button>
+                    </TooltipTrigger>
 
-        {/* Tooltip with larger image */}
-        <TooltipContent className="p-0 rounded-lg shadow-lg">
-          <img
-            src={img.url}
-            alt={img.name}
-            className="w-40 h-24 object-cover rounded-md"
-          />
-        </TooltipContent>
-      </Tooltip>
-    ))}
-  </TooltipProvider>
-</div>
+                    {/* Tooltip with larger image */}
+                    <TooltipContent className="p-0 rounded-lg shadow-lg">
+                      <img
+                        src={img.url}
+                        alt={img.name}
+                        className="w-40 h-24 object-cover rounded-md"
+                      />
+                    </TooltipContent>
+                  </Tooltip>
+                ))}
+              </TooltipProvider>
+            </div>
           </div>
         </div>
       )}
@@ -238,7 +249,9 @@ const FloatingToolbar = ({
           <div className="flex items-center gap-4 justify-center">
             <div className="flex items-center gap-2 flex-shrink-0">
               <Upload className="w-4 h-4 text-gray-600" />
-              <span className="text-sm font-medium text-gray-700 whitespace-nowrap">Upload Background:</span>
+              <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                Upload Background:
+              </span>
             </div>
 
             <div className="relative">
@@ -254,15 +267,17 @@ const FloatingToolbar = ({
                 }}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
               />
-              <Button variant="outline" size="sm" className="gap-2 bg-white hover:bg-gray-50">
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2 bg-white hover:bg-gray-50"
+              >
                 <Upload className="w-3 h-3" />
                 Choose Image
               </Button>
             </div>
 
-            <p className="text-xs text-gray-500">
-              Supports PNG, JPG, WebP
-            </p>
+            <p className="text-xs text-gray-500">Supports PNG, JPG, WebP</p>
           </div>
         </div>
       )}
@@ -347,6 +362,12 @@ export default function BgRemovalClient() {
   const [isDownloading, setIsDownloading] = useState(false);
   const [activeToolbarTab, setActiveToolbarTab] = useState<string | null>(null);
 
+  // Image dimensions state
+  const [imageDimensions, setImageDimensions] = useState<{
+    width: number;
+    height: number;
+  } | null>(null);
+
   const validateImageFile = (file: File): string | null => {
     const validTypes = ["image/png", "image/jpeg", "image/jpg", "image/webp"];
     if (!validTypes.includes(file.type)) {
@@ -374,6 +395,16 @@ export default function BgRemovalClient() {
       setMode("compare");
       setBgType("transparent");
       setActiveToolbarTab(null);
+
+      // Load image to get dimensions
+      const img = new Image();
+      img.onload = () => {
+        setImageDimensions({
+          width: img.naturalWidth,
+          height: img.naturalHeight,
+        });
+      };
+      img.src = url;
     }
   };
 
@@ -385,6 +416,7 @@ export default function BgRemovalClient() {
     setMode("compare");
     setBgType("transparent");
     setActiveToolbarTab(null);
+    setImageDimensions(null);
   };
 
   const handleProcess = async () => {
@@ -523,9 +555,12 @@ export default function BgRemovalClient() {
       )}
 
       {/* Main Content Area */}
-      <div className="flex flex-col">
+      <div className="flex flex-col flex-1">
         {/* Main Canvas / Preview Area */}
-        <div className="w-full flex items-center justify-center relative overflow-hidden py-8 min-h-[600px]">
+        <div
+          className="w-full flex items-center justify-center relative overflow-hidden py-4 md:py-8 flex-1"
+          style={{ minHeight: previewUrl ? "500px" : "400px" }}
+        >
           {/* Floating Buttons */}
           {previewUrl && (
             <div className="absolute top-4 left-4 right-4 z-10 flex justify-between">
@@ -539,34 +574,36 @@ export default function BgRemovalClient() {
                 <RefreshCw className="mr-2 h-3.5 w-3.5" />
                 New Image
               </Button>
-              {!processedUrl && <Button
-                variant="default"
-                size="sm"
-                onClick={handleProcess}
-                disabled={isLoading}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
-                    {loadingStep || "Processing..."}
-                  </>
-                ) : (
-                  <>
-                    <Eraser className="mr-2 h-3.5 w-3.5" />
-                    Remove Background
-                  </>
-                )}
-              </Button>}
+              {!processedUrl && (
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={handleProcess}
+                  disabled={isLoading}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                      {loadingStep || "Processing..."}
+                    </>
+                  ) : (
+                    <>
+                      <Eraser className="mr-2 h-3.5 w-3.5" />
+                      Remove Background
+                    </>
+                  )}
+                </Button>
+              )}
             </div>
           )}
 
           {!previewUrl ? (
             // Upload State
-            <div className="w-full max-w-md text-center">
-              <div className="relative group cursor-pointer">
+            <div className="w-full flex items-center justify-center min-h-[400px]">
+              <div className="relative group cursor-pointer w-full max-w-2xl">
                 <div className="absolute inset-0 bg-indigo-500/5 blur-2xl rounded-full group-hover:bg-indigo-500/10 transition-all duration-500" />
-                <div className="relative bg-white border-2 border-dashed border-gray-200 rounded-2xl p-12 hover:border-indigo-500/50 hover:shadow-lg transition-all duration-300">
+                <div className="relative bg-white border-2 border-dashed border-gray-200 rounded-2xl p-16 hover:border-indigo-500/50 hover:shadow-lg transition-all duration-300">
                   <input
                     type="file"
                     accept="image/*"
@@ -577,10 +614,10 @@ export default function BgRemovalClient() {
                   <div className="bg-indigo-50 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
                     <Upload className="w-8 h-8 text-indigo-600" />
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2 text-center">
                     Upload an image
                   </h3>
-                  <p className="text-gray-500 text-sm mb-6">
+                  <p className="text-gray-500 text-sm mb-6 text-center">
                     Drag and drop or click to browse
                   </p>
                   <div className="flex items-center justify-center gap-4 text-xs text-gray-400">
@@ -595,8 +632,8 @@ export default function BgRemovalClient() {
             </div>
           ) : (
             // Display State - Preview with Compare/Customize Modes
-            <div className="relative w-full flex items-center justify-center p-8">
-              <div className="w-full max-w-4xl aspect-video bg-gray-100 rounded-lg overflow-hidden shadow-lg flex items-center justify-center relative">
+            <div className="relative w-full flex items-center justify-center p-4 md:p-8 flex-1 min-h-[400px]">
+              <div className="bg-gray-100 rounded-lg overflow-hidden shadow-lg flex items-center justify-center relative max-w-full max-h-full w-auto h-auto">
                 {/* Compare Mode - Slider */}
                 {mode === "compare" && processedUrl ? (
                   <ReactCompareSlider
@@ -604,6 +641,13 @@ export default function BgRemovalClient() {
                       <ReactCompareSliderImage
                         src={previewUrl!}
                         alt="Original"
+                        style={{
+                          objectFit: "contain",
+                          maxWidth: "100%",
+                          maxHeight: "calc(100vh - 400px)",
+                          width: "auto",
+                          height: "auto",
+                        }}
                       />
                     }
                     itemTwo={
@@ -611,50 +655,85 @@ export default function BgRemovalClient() {
                         src={processedUrl}
                         alt="Result"
                         className="bg-checkerboard"
+                        style={{
+                          objectFit: "contain",
+                          maxWidth: "100%",
+                          maxHeight: "calc(100vh - 400px)",
+                          width: "auto",
+                          height: "auto",
+                        }}
                       />
                     }
                     style={{
                       display: "flex",
-                      width: "100%",
-                      height: "100%",
+                      width: "auto",
+                      height: "auto",
+                      maxWidth: "100%",
+                      maxHeight: "calc(100vh - 400px)",
                     }}
                   />
                 ) : mode === "customize" && processedUrl ? (
                   // Customize Mode - With Background
-                  <div className="relative w-full h-full">
-                    {/* Background Layer */}
+                  <div
+                    className="relative flex items-center justify-center"
+                    style={{
+                      maxWidth: "100%",
+                      maxHeight: "calc(100vh - 400px)",
+                    }}
+                  >
                     <div
-                      className="absolute inset-0 w-full h-full"
+                      className="relative"
                       style={{
-                        backgroundColor:
-                          bgType === "color" ? bgValue : "transparent",
-                        backgroundImage:
-                          bgType === "image"
-                            ? `url(${bgValue})`
-                            : bgType === "transparent"
-                              ? undefined
-                              : "none",
-                        backgroundSize: "cover",
-                        backgroundPosition: "center",
+                        maxWidth: "100%",
+                        maxHeight: "calc(100vh - 400px)",
                       }}
                     >
-                      {bgType === "transparent" && (
-                        <div className="w-full h-full bg-checkerboard" />
-                      )}
+                      {/* Background Layer */}
+                      <div
+                        className="absolute inset-0"
+                        style={{
+                          backgroundColor:
+                            bgType === "color" ? bgValue : "transparent",
+                          backgroundImage:
+                            bgType === "image"
+                              ? `url(${bgValue})`
+                              : bgType === "transparent"
+                              ? undefined
+                              : "none",
+                          backgroundSize: "cover",
+                          backgroundPosition: "center",
+                        }}
+                      >
+                        {bgType === "transparent" && (
+                          <div className="w-full h-full bg-checkerboard" />
+                        )}
+                      </div>
+                      {/* Foreground Layer */}
+                      <img
+                        src={processedUrl}
+                        alt="Foreground"
+                        className="relative z-10 object-contain"
+                        style={{
+                          maxWidth: "100%",
+                          maxHeight: "calc(100vh - 400px)",
+                          width: "auto",
+                          height: "auto",
+                        }}
+                      />
                     </div>
-                    {/* Foreground Layer */}
-                    <img
-                      src={processedUrl}
-                      alt="Foreground"
-                      className="relative z-10 w-full h-full object-contain"
-                    />
                   </div>
                 ) : (
                   // Default Preview
                   <img
                     src={previewUrl!}
                     alt="Preview"
-                    className="w-full h-full object-contain"
+                    className="object-contain"
+                    style={{
+                      maxWidth: "100%",
+                      maxHeight: "calc(100vh - 400px)",
+                      width: "auto",
+                      height: "auto",
+                    }}
                   />
                 )}
               </div>
@@ -692,53 +771,51 @@ export default function BgRemovalClient() {
       </div>
 
       <style jsx global>{`
-          .bg-checkerboard {
-            background-color: white;
-            background-image: linear-gradient(45deg, #f0f0f0 25%, transparent 25%),
-              linear-gradient(-45deg, #f0f0f0 25%, transparent 25%),
-              linear-gradient(45deg, transparent 75%, #f0f0f0 75%),
-              linear-gradient(-45deg, transparent 75%, #f0f0f0 75%);
-            background-size: 20px 20px;
-            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
-          }
-          
-          .scrollbar-hide {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-          }
-          
-          .scrollbar-hide::-webkit-scrollbar {
-            display: none;
-          }
-        `}</style>
+        .bg-checkerboard {
+          background-color: white;
+          background-image: linear-gradient(45deg, #f0f0f0 25%, transparent 25%),
+            linear-gradient(-45deg, #f0f0f0 25%, transparent 25%),
+            linear-gradient(45deg, transparent 75%, #f0f0f0 75%),
+            linear-gradient(-45deg, transparent 75%, #f0f0f0 75%);
+          background-size: 20px 20px;
+          background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        }
+
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
 
       {/* Floating Glass Toolbar */}
-      {
-       !isLoading && previewUrl && processedUrl && (
-          <FloatingToolbar
-            activeTab={activeToolbarTab}
-            onTabChange={(tab) => {
-              setActiveToolbarTab(tab);
-              // Auto-enable compare mode when Compare tab is selected
-              if (tab === "Compare" && processedUrl) {
-                setMode("compare");
-              }
-            }}
-            onDownload={handleCompositeDownload}
-            isDownloading={isDownloading}
-            processedUrl={processedUrl}
-            onModeChange={setMode}
-            mode={mode}
-            bgType={bgType}
-            bgValue={bgValue}
-            onBgChange={(type, value) => {
-              setBgType(type);
-              setBgValue(value);
-              setMode("customize");
-            }}
-          />
-        )
-      }
-    </div >
+      {!isLoading && previewUrl && processedUrl && (
+        <FloatingToolbar
+          activeTab={activeToolbarTab}
+          onTabChange={(tab) => {
+            setActiveToolbarTab(tab);
+            // Auto-enable compare mode when Compare tab is selected
+            if (tab === "Compare" && processedUrl) {
+              setMode("compare");
+            }
+          }}
+          onDownload={handleCompositeDownload}
+          isDownloading={isDownloading}
+          processedUrl={processedUrl}
+          onModeChange={setMode}
+          mode={mode}
+          bgType={bgType}
+          bgValue={bgValue}
+          onBgChange={(type, value) => {
+            setBgType(type);
+            setBgValue(value);
+            setMode("customize");
+          }}
+        />
+      )}
+    </div>
   );
 }
