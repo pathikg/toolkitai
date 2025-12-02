@@ -63,6 +63,14 @@ export const availableTools = [
         href: '/tools/hairstyle-grid',
         category: 'image' as const,
     },
+    {
+        id: 'hand-drawn-portrait',
+        name: 'Hand-Drawn Portrait',
+        description: 'Transform photos into hand-drawn portrait illustrations in black and red pen on notebook paper style.',
+        icon: PenTool,
+        href: '/tools/hand-drawn-portrait',
+        category: 'image' as const,
+    },
 ]
 
 // Coming Soon - Tools in development
