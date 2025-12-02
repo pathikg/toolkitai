@@ -23,7 +23,8 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 logger = logging.getLogger(__name__)
-
+from dotenv import load_dotenv
+load_dotenv()
 
 # Authentication Middleware
 class AuthMiddleware(BaseHTTPMiddleware):
@@ -129,7 +130,7 @@ app = FastAPI(title="ToolkitAI API")
 allowed_origins = os.getenv(
     "ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:3001"
 ).split(",")
-
+print(allowed_origins)
 # Add authentication middleware (before CORS)
 app.add_middleware(AuthMiddleware)
 
@@ -1099,6 +1100,143 @@ async def proxy_image(url: str):
         logger.error(f"Error proxying image: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+# adding the cinematic backend service
+@app.post("/api/cinematic-storyboard")
+async def cinematic_storyboard(
+    source_image: UploadFile = File(...),
+    scene_type: str = Form(""),
+    mood: str = Form(""),
+    custom_prompt: str = Form(""),
+):
+    """
+    Cinematic Storyboard endpoint - generates a 2x3 grid with 6 different camera angles
+    """
+    try:
+        logger.info(
+            f"Processing cinematic storyboard request. Image: {source_image.filename}, Scene: {scene_type}, Mood: {mood}"
+        )
+
+        # Read image
+        source_bytes = await source_image.read()
+        source_pil = Image.open(io.BytesIO(source_bytes))
+
+        # For a 2x3 grid, use 2:3 aspect ratio
+        aspect_ratio = "2:3"
+
+        logger.info(f"Using aspect ratio: {aspect_ratio} for 2x3 storyboard grid")
+
+        api_key = os.getenv("GOOGLE_API_KEY")
+        if not api_key:
+            logger.error("GOOGLE_API_KEY not set")
+            raise HTTPException(status_code=500, detail="GOOGLE_API_KEY not set")
+
+        client = genai.Client(api_key=api_key)
+
+        # Build the prompt
+        base_prompt = """Cinematic Storyboard Task:
+Analyze the uploaded photo and create a cinematic storyboard showing the same scene from 6 different camera angles.
+
+Requirements:
+1. Generate a 2x3 grid image (2 columns, 3 rows = 6 total shots).
+2. Each cell in the grid should show the SAME SCENE but from a DIFFERENT camera angle and composition.
+3. The 6 shots should demonstrate professional cinematic language:
+   - Shot 1 (Top Left): Wide/Establishing Shot - show the full scene and context
+   - Shot 2 (Top Right): Medium Shot - focus on the main subject(s) from mid-distance
+   - Shot 3 (Middle Left): Close-Up - tight shot on important details or faces
+   - Shot 4 (Middle Right): Over-the-Shoulder - perspective from behind a subject
+   - Shot 5 (Bottom Left): Low Angle - camera looking up at the subject (power/dominance)
+   - Shot 6 (Bottom Right): High Angle - camera looking down at the subject (vulnerability)
+4. Keep the scene, subjects, lighting, and overall atmosphere CONSISTENT across all shots - only the camera position and framing change.
+5. Ensure high photorealism and professional cinematography quality.
+6. The grid should be perfectly aligned with clear separation between shots.
+7. Each shot should be clearly distinct in framing and perspective.
+8. Maintain visual continuity - it should feel like a real film storyboard.
+"""
+
+        # Add optional customizations
+        if scene_type:
+            base_prompt += f"\n\nScene Type: {scene_type} - Adjust the cinematography and mood to match this genre."
+        
+        if mood:
+            base_prompt += f"\n\nMood/Tone: {mood} - The lighting, colors, and composition should reflect this mood."
+        
+        if custom_prompt:
+            base_prompt += f"\n\nAdditional Instructions: {custom_prompt}"
+
+        logger.info("Sending request to Gemini API for Cinematic Storyboard...")
+        response = client.models.generate_content(
+            model="gemini-3-pro-image-preview",
+            contents=[source_pil, base_prompt],
+            config=types.GenerateContentConfig(
+                response_modalities=["IMAGE"],
+                image_config=types.ImageConfig(aspect_ratio=aspect_ratio),
+                safety_settings=[
+                    types.SafetySetting(
+                        category=types.HarmCategory.HARM_CATEGORY_HARASSMENT,
+                        threshold=types.HarmBlockThreshold.BLOCK_ONLY_HIGH,
+                    ),
+                    types.SafetySetting(
+                        category=types.HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+                        threshold=types.HarmBlockThreshold.BLOCK_ONLY_HIGH,
+                    ),
+                ],
+            ),
+        )
+        logger.info("Received response from Gemini API")
+
+        generated_image_bytes = None
+
+        if response.parts:
+            for part in response.parts:
+                if part.inline_data:
+                    img = part.as_image()
+
+                    # Save to a temporary file
+                    with tempfile.NamedTemporaryFile(
+                        suffix=".png", delete=False
+                    ) as tmp_file:
+                        tmp_path = tmp_file.name
+
+                    img.save(tmp_path)
+
+                    # Add watermark in-place
+                    add_watermark(tmp_path)
+
+                    # Read back the watermarked image
+                    with open(tmp_path, "rb") as f:
+                        generated_image_bytes = f.read()
+
+                    os.remove(tmp_path)
+                    break
+
+        if not generated_image_bytes:
+            text_response = ""
+            if response.parts:
+                for part in response.parts:
+                    if part.text:
+                        text_response += part.text
+
+            logger.warning(f"No image generated. Text response: {text_response}")
+
+            if text_response:
+                raise HTTPException(
+                    status_code=400, detail=f"Generation failed: {text_response}"
+                )
+            else:
+                raise HTTPException(
+                    status_code=500,
+                    detail="Failed to generate image. The model might have failed to process the request.",
+                )
+
+        logger.info("Cinematic storyboard successful, returning image.")
+        return Response(content=generated_image_bytes, media_type="image/png")
+
+    except HTTPException as he:
+        logger.error(f"HTTP Exception in cinematic storyboard: {he.detail}")
+        raise he
+    except Exception as e:
+        logger.error(f"Unexpected error in cinematic storyboard: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     import uvicorn

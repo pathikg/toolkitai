@@ -42,18 +42,29 @@ const ToolbarButton = ({
   onClick: () => void;
 }) => {
   const baseClasses =
-    "flex items-center space-x-2 px-3 py-2 rounded-full transition-all duration-200 cursor-pointer text-sm font-medium";
+    "flex items-center justify-center p-3 sm:px-4 sm:py-2 rounded-full transition-all duration-200 cursor-pointer text-sm font-medium";
   const inactiveClasses = "text-gray-600 hover:bg-gray-100/60";
   const activeClasses = "bg-gray-200/80 text-gray-800 shadow-inner";
 
   return (
-    <button
-      onClick={onClick}
-      className={`${baseClasses} ${isActive ? activeClasses : inactiveClasses}`}
-    >
-      <Icon className="w-5 h-5" />
-      <span>{label}</span>
-    </button>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            onClick={onClick}
+            className={`${baseClasses} ${
+              isActive ? activeClasses : inactiveClasses
+            }`}
+          >
+            <Icon className="w-5 h-5 sm:mr-2" />
+            <span className="hidden sm:inline">{label}</span>
+          </button>
+        </TooltipTrigger>
+        <TooltipContent side="top" className="sm:hidden">
+          <p>{label}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 };
 
@@ -66,17 +77,23 @@ const DownloadButton = ({
   disabled?: boolean;
 }) => {
   return (
-    <div className="flex items-center ml-4">
-      {/* Main Download Button */}
-      <button
-        onClick={onDownload}
-        disabled={disabled}
-        className="flex items-center cursor-pointer justify-center px-4 py-2 rounded-full bg-indigo-600 text-white font-semibold transition-colors duration-200 hover:bg-indigo-700 h-full disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        <Download className="w-5 h-5 mr-2" />
-        <span>Download</span>
-      </button>
-    </div>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            onClick={onDownload}
+            disabled={disabled}
+            className="flex items-center cursor-pointer justify-center p-3 sm:px-4 sm:py-2 rounded-full bg-indigo-600 text-white text-sm font-semibold transition-colors duration-200 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Download className="w-5 h-5 sm:mr-2" />
+            <span className="hidden sm:inline">Download</span>
+          </button>
+        </TooltipTrigger>
+        <TooltipContent side="top" className="sm:hidden">
+          <p>Download</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 };
 
@@ -240,14 +257,14 @@ const FloatingToolbar = ({
             rounded-full
             border border-gray-200/50
             shadow-xl
-            px-6 py-3
+            px-4 sm:px-6 py-3
             pointer-events-auto
             animate-in slide-in-from-bottom-2 duration-200
-            max-w-4xl w-full
+            max-w-4xl w-auto
           "
         >
           <div className="flex items-center gap-4 justify-center">
-            <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="hidden sm:flex items-center gap-2 shrink-0">
               <Upload className="w-4 h-4 text-gray-600" />
               <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
                 Upload Background:
@@ -273,11 +290,13 @@ const FloatingToolbar = ({
                 className="gap-2 bg-white hover:bg-gray-50"
               >
                 <Upload className="w-3 h-3" />
-                Choose Image
+                <span className="hidden sm:inline">Choose</span> Image
               </Button>
             </div>
 
-            <p className="text-xs text-gray-500">Supports PNG, JPG, WebP</p>
+            <p className="hidden sm:block text-xs text-gray-500">
+              Supports PNG, JPG, WebP
+            </p>
           </div>
         </div>
       )}
@@ -285,14 +304,14 @@ const FloatingToolbar = ({
       {/* Main Toolbar */}
       <div
         className="
-          flex items-center justify-between
+          flex items-center justify-evenly
           p-2 sm:p-3
           rounded-full
           border border-gray-200/50
           shadow-xl
           bg-white/30
           backdrop-blur-md
-          max-w-2xl w-full
+          max-w-xs sm:max-w-2xl w-full
           transition-all duration-300
           pointer-events-auto
         "
@@ -301,45 +320,41 @@ const FloatingToolbar = ({
             "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.5)",
         }}
       >
-        {/* Left Section: Main Tools */}
-        <div className="flex space-x-1 sm:space-x-2">
-          {tools.map((tool) => (
-            <ToolbarButton
-              key={tool.id}
-              icon={tool.icon}
-              label={tool.label}
-              isActive={
-                tool.id === "Compare"
-                  ? mode === "compare" && processedUrl !== null
-                  : activeTab === tool.id
-              }
-              onClick={() => {
-                if (tool.id === "Compare") {
-                  // Enable compare mode and close side panel
-                  if (processedUrl) {
-                    onModeChange("compare");
-                    onTabChange(null);
-                  }
-                } else {
-                  // Toggle inline strip (Color, Images, Upload)
-                  const newTab = activeTab === tool.id ? null : tool.id;
-                  onTabChange(newTab);
-                  if (newTab && processedUrl) {
-                    onModeChange("customize");
-                  }
+        {/* Tools spread evenly */}
+        {tools.map((tool) => (
+          <ToolbarButton
+            key={tool.id}
+            icon={tool.icon}
+            label={tool.label}
+            isActive={
+              tool.id === "Compare"
+                ? mode === "compare" && processedUrl !== null
+                : activeTab === tool.id
+            }
+            onClick={() => {
+              if (tool.id === "Compare") {
+                // Enable compare mode and close side panel
+                if (processedUrl) {
+                  onModeChange("compare");
+                  onTabChange(null);
                 }
-              }}
-            />
-          ))}
-        </div>
-        {/* Right Section: Download Action */}
-        <div className="flex items-center">
-          {/* Download Button Group */}
-          <DownloadButton
-            onDownload={onDownload}
-            disabled={!processedUrl || isDownloading}
+              } else {
+                // Toggle inline strip (Color, Images, Upload)
+                const newTab = activeTab === tool.id ? null : tool.id;
+                onTabChange(newTab);
+                if (newTab && processedUrl) {
+                  onModeChange("customize");
+                }
+              }
+            }}
           />
-        </div>
+        ))}
+
+        {/* Download Button */}
+        <DownloadButton
+          onDownload={onDownload}
+          disabled={!processedUrl || isDownloading}
+        />
       </div>
     </div>
   );
@@ -563,16 +578,16 @@ export default function BgRemovalClient() {
         >
           {/* Floating Buttons */}
           {previewUrl && (
-            <div className="absolute top-4 left-4 right-4 z-10 flex justify-between">
+            <div className="absolute top-4 left-4 right-4 z-10 flex justify-between items-center gap-2">
               <Button
                 variant="secondary"
                 size="sm"
                 onClick={handleReset}
                 disabled={isLoading}
-                className="bg-white/90 backdrop-blur hover:bg-white shadow-sm border cursor-pointer"
+                className="bg-white/90 backdrop-blur hover:bg-white shadow-sm border cursor-pointer shrink-0"
               >
-                <RefreshCw className="mr-2 h-3.5 w-3.5" />
-                New Image
+                <RefreshCw className="h-3.5 w-3.5 sm:mr-2" />
+                <span className="hidden sm:inline">New Image</span>
               </Button>
               {!processedUrl && (
                 <Button
@@ -580,17 +595,21 @@ export default function BgRemovalClient() {
                   size="sm"
                   onClick={handleProcess}
                   disabled={isLoading}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shrink-0"
                 >
                   {isLoading ? (
                     <>
-                      <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
-                      {loadingStep || "Processing..."}
+                      <Loader2 className="h-3.5 w-3.5 animate-spin sm:mr-2" />
+                      <span className="hidden sm:inline">
+                        {loadingStep || "Processing..."}
+                      </span>
                     </>
                   ) : (
                     <>
-                      <Eraser className="mr-2 h-3.5 w-3.5" />
-                      Remove Background
+                      <Eraser className="h-3.5 w-3.5 sm:mr-2" />
+                      <span className="hidden sm:inline">
+                        Remove Background
+                      </span>
                     </>
                   )}
                 </Button>
