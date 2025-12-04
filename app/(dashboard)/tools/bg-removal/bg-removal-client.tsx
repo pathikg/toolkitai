@@ -157,8 +157,8 @@ const FloatingToolbar = ({
               <button
                 onClick={() => onBgChange("transparent", "")}
                 className={`w-10 h-10 flex-shrink-0 rounded-lg border-2 flex items-center justify-center transition-all hover:scale-110 ${bgType === "transparent"
-                    ? "border-indigo-600 ring-2 ring-indigo-200 shadow-lg scale-105"
-                    : "border-gray-300 hover:border-indigo-400"
+                  ? "border-indigo-600 ring-2 ring-indigo-200 shadow-lg scale-105"
+                  : "border-gray-300 hover:border-indigo-400"
                   }`}
                 title="Transparent"
               >
@@ -171,8 +171,8 @@ const FloatingToolbar = ({
                   key={color}
                   onClick={() => onBgChange("color", color)}
                   className={`w-10 h-10 flex-shrink-0 rounded-lg border-2 transition-all hover:scale-110 ${bgType === "color" && bgValue === color
-                      ? "border-indigo-600 ring-2 ring-indigo-200 shadow-lg scale-105"
-                      : "border-white/80 hover:border-indigo-400 shadow-sm"
+                    ? "border-indigo-600 ring-2 ring-indigo-200 shadow-lg scale-105"
+                    : "border-white/80 hover:border-indigo-400 shadow-sm"
                     }`}
                   style={{ backgroundColor: color }}
                   title={color}
@@ -217,8 +217,8 @@ const FloatingToolbar = ({
                           onModeChange("customize");
                         }}
                         className={`relative w-16 h-10 flex-shrink-0 rounded-lg overflow-hidden border-2 transition-all hover:scale-105 ${bgType === "image" && bgValue === img.url
-                            ? "border-indigo-600 ring-2 ring-indigo-100 shadow-md scale-105"
-                            : "border-gray-200 hover:border-indigo-400"
+                          ? "border-indigo-600 ring-2 ring-indigo-100 shadow-md scale-105"
+                          : "border-gray-200 hover:border-indigo-400"
                           }`}
                       >
                         <img
@@ -379,25 +379,9 @@ export default function BgRemovalClient() {
     height: number;
   } | null>(null);
 
-  const validateImageFile = (file: File): string | null => {
-    const validTypes = ["image/png", "image/jpeg", "image/jpg", "image/webp", "image/heic", "image/heif", "image/heic-sequence", "image/heif-sequence"];
-    if (!validTypes.includes(file.type)) {
-      return "Please upload a valid image file (PNG, JPG, JPEG, WebP, or HEIC/HEIF).";
-    }
-    if (file.size > 50 * 1024 * 1024) {
-      return "File size exceeds 50MB limit. Please upload a smaller image.";
-    }
-    return null;
-  };
-
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const validationError = validateImageFile(file);
-      if (validationError) {
-        setError(validationError);
-        return;
-      }
       setSelectedFile(file);
       const url = URL.createObjectURL(file);
       setPreviewUrl(url);

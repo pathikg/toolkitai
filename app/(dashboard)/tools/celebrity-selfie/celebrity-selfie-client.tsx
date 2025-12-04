@@ -18,25 +18,9 @@ export default function CelebritySelfieClient() {
     const [error, setError] = useState<string | null>(null)
     const [customPrompt, setCustomPrompt] = useState<string>('')
 
-    const validateImageFile = (file: File): string | null => {
-        const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/heic', 'image/heif', 'image/heic-sequence', 'image/heif-sequence']
-        if (!validTypes.includes(file.type)) {
-            return 'Please upload a valid image file (PNG, JPG, JPEG, WebP, or HEIC/HEIF).'
-        }
-        if (file.size > 50 * 1024 * 1024) {
-            return 'File size exceeds 50MB limit. Please upload a smaller image.'
-        }
-        return null
-    }
-
     const handleUserChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
         if (file) {
-            const error = validateImageFile(file)
-            if (error) {
-                setError(error)
-                return
-            }
             setUserFile(file)
             setUserPreview(URL.createObjectURL(file))
             setGeneratedImage(null)
@@ -47,11 +31,6 @@ export default function CelebritySelfieClient() {
     const handleCelebrityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
         if (file) {
-            const error = validateImageFile(file)
-            if (error) {
-                setError(error)
-                return
-            }
             setCelebrityFile(file)
             setCelebrityPreview(URL.createObjectURL(file))
             setGeneratedImage(null)
