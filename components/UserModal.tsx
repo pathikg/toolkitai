@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
+import { CheckButton } from "./CheckButton";
 
 interface UserModalProps {
   isOpen: boolean;
@@ -209,6 +210,9 @@ export function UserModal({ isOpen, onClose, user }: UserModalProps) {
                       </>
                     )}
                   </Button>
+                  <div className="flex items-center gap-2 my-2 w">
+                    <CheckButton className="w-full" />{" "}
+                  </div>
                 </div>
               </motion.div>
             </motion.div>
